@@ -16,6 +16,8 @@ VMware Workstation 与 Device/Credential Guard 不兼容。在禁用 Device/Cred
 
 打开“Windows PowerShell(管理员)(A)”
 
+ 对应的打开Hyper-V的命令：bcdedit /set hypervisorlaunchtype auto
+
 输入：bcdedit /set hypervisorlaunchtype off
 
 重启
