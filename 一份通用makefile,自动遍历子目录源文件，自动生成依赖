@@ -1,0 +1,37 @@
+这份makefile可以将当前makefile所在文件夹以及所有子文件夹中的cpp文件打包成静态库/动态库/可执行文件.
+自动生成所有依赖关系，修改任何文件都可以触发重新编译相应依赖的文件。
+
+在Ubuntu 和 OSX 系统测试通过。
+
+
+SHELL = /bin/bash
+ 
+AllDirs := $(shell ls -R | grep '^\./.*:$$' | awk '{gsub(":","");print}') .
+Sources := $(foreach n,$(AllDirs) , $(wildcard $(n)/*.cpp))
+Objs := $(patsubst %.cpp,%.o, $(Sources))
+Deps := $(patsubst %.cpp,%.d, $(Sources))
+StaticLib := libyy.a
+DynamicLib := libyy.so
+Bin := yy
+#AllLibs : $(DynamicLib)
+#AllLibs : $(StaticLib) 
+AllLibs : $(Bin)
+CC = g++
+CXXFLAGS = -g -O2 -fPIC -Wall
+CPPFLAGS = $(foreach n,$(AllDirs) , -I$(n))
+LDFLAGS = -lstdc++
+$(StaticLib) : $(Objs)
+	ar rcs $@ $^
+$(DynamicLib) : $(Objs)
+	g++ -shared -o $@ $^ $(LDFLAGS)
+$(Bin) : $(Objs)
+	g++ $(Objs) -o $@
+%.d : %.cpp
+	$(CC) -MT"$(<:.cpp=.o) $@" -MM $(CXXFLAGS) $(CPPFLAGS) $< > $@
+sinclude $(Deps)
+.PHONY : clean
+clean: 
+	rm -f $(Objs) $(Deps) $(StaticLib) $(DynamicLib) $(Bin)
+————————————————
+版权声明：本文为CSDN博主「yuliying」的原创文章，遵循CC 4.0 BY-SA版权协议，转载请附上原文出处链接及本声明。
+原文链接：https://blog.csdn.net/yuliying/article/details/49635485
