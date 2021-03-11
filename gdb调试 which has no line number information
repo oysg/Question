@@ -1,0 +1,4 @@
+gdb调试的时候，出现gdb single stepping until exit from function *, which has no line number information信息
+
+解决方案：
+将编译选项-O2修改为-O
