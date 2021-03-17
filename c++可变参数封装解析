@@ -1,0 +1,62 @@
+#include <iostream>
+#include <string>
+#include <vector>
+#include <typeinfo>
+#include <map>
+
+using namespace std;
+
+typedef const char * constchar;
+
+map<string, void*> g_strMapVoid;
+
+//封装参数递归终止函数
+void PackageParam()
+{
+}
+
+//封装参数展开函数
+template <class T, class ...Args>
+void PackageParam(T head, Args... rest)
+{
+    T *t = new T;
+    *t = head;
+    g_strMapVoid.insert(map<string, void*>::value_type(typeid(head).name(), (void*)t));
+    PackageParam(rest...);
+}
+
+//解析参数递归终止函数
+void AnalysisParam()
+{
+
+}
+
+//解析参数展开函数
+template <class T, class ...Args>
+void AnalysisParam(T &head, Args&... rest)
+{
+    map<string, void*>::iterator iter = g_strMapVoid.find(typeid(T).name());
+    if (iter != g_strMapVoid.end())
+    {
+        head = *((T*)iter->second);
+    }
+
+    AnalysisParam(rest...);
+}
+
+int main(void)
+{
+    PackageParam(1, 2.5, "hello", string("world"));
+
+    int m = 0;
+    double n = 0.0;
+    const char *c_str = "l";
+    string str;
+    AnalysisParam(m, n, c_str, str);
+
+    cout << "m = " << m << endl;
+    cout << "n = " << n << endl;
+    cout << "c_str = " << c_str << endl;
+    cout << "str = " << str << endl;
+    return 0;
+}
