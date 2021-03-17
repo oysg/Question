@@ -11,13 +11,13 @@ typedef const char * constchar;
 map<string, void*> g_strMapVoid;
 
 //封装参数递归终止函数
-void Parameter::PackageParam()
+void PackageParam()
 {
 }
 
 //封装参数展开函数
 template <class T, class ...Args>
-void Parameter::PackageParam(T head, Args... rest)
+void PackageParam(T head, Args... rest)
 {
     T *t = new T;
     *t = head;
@@ -26,14 +26,14 @@ void Parameter::PackageParam(T head, Args... rest)
 }
 
 //解析参数递归终止函数
-void Parameter::ParseParam()
+void ParseParam()
 {
 
 }
 
 //解析参数展开函数
 template <class T, class ...Args>
-void Parameter::ParseParam(T &head, Args&... rest)
+void ParseParam(T &head, Args&... rest)
 {
     map<string, void*>::iterator iter = g_strMapVoid.find(typeid(T).name());
     if (iter != g_strMapVoid.end())
