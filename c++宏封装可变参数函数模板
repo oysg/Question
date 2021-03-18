@@ -1,0 +1,83 @@
+#include <vector>
+#include <typeinfo>
+#include <map>
+#include <string>
+#include <iostream>
+
+using namespace std;
+
+struct NotifyMsg
+{
+public:
+    int nMsg;
+    string strClassName;
+    map<string, void*> &GetMapParam();
+private:
+    map<string, void*> m_strMapVoid;
+};
+
+map<string, void*>& NotifyMsg::GetMapParam()
+{
+    return m_strMapVoid;
+}
+
+#define PACKAGEPARAMETER(className)\
+void PackageParam##className(map<string, void*> &mapParam) \
+{ \
+} \
+ \
+template <class T, class ...Args> \
+void PackageParam##className(map<string, void*> &mapParam, T head, Args... rest) \
+{ \
+    T *t = new T; \
+    *t = head; \
+    mapParam.insert(map<string, void*>::value_type(typeid(head).name(), (void*)t)); \
+    PackageParam##className(mapParam, rest...); \
+}
+
+#define PARSEPARAMETER(className)\
+void ParseParam##className(map<string, void*> &mapParam) \
+{ \
+    mapParam.clear(); \
+} \
+ \
+template <class T, class ...Args> \
+void ParseParam##className(map<string, void*> &mapParam, T &head, Args&... rest) \
+{ \
+    map<string, void*>::iterator iter = mapParam.find(typeid(T).name()); \
+    if (iter != mapParam.end()) \
+    { \
+        head = *((T*)iter->second); \
+    } \
+ \
+    T *t = (T*)iter->second; \
+    delete t; \
+ \
+    ParseParam##className(mapParam, rest...); \
+}
+
+
+PACKAGEPARAMETER(Main)
+PARSEPARAMETER(Main)
+
+
+
+int main(void)
+{
+    NotifyMsg notify;
+    map<string, void*>& strMapVoid = notify.GetMapParam();
+    PackageParamMain(strMapVoid, 1, 2.5, "hello", string("world"));
+
+    
+    int a = 0;
+    double b = 0.0;
+    const char *c_str = NULL;
+    string str;
+    ParseParamMain(strMapVoid, a, b, c_str, str);
+
+    cout << "a = " << a << endl;
+    cout << "b = " << b << endl;
+    cout << "c_str = " << c_str << endl;
+    cout << "str = " << str << endl;
+    return 0;
+}
