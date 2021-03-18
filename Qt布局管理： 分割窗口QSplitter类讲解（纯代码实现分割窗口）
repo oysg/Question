@@ -1,3 +1,5 @@
+https://blog.csdn.net/rl529014/article/details/51489756
+
 一个QSplitter是一个可以包含其他控件的控件，这些控件被一个分隔条隔开，托拽这个分隔条，可以改变splitter的子控件的大小。
 
 QSplitter控件经常做为布局管理器使用，给用户提供更多的界面控制。
