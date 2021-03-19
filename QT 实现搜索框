@@ -1,0 +1,87 @@
+简述
+关于搜索框，大家都经常接触。例如：浏览器搜索、Windows资源管理器搜索等。
+
+
+
+
+
+当然，这些对于Qt实现来说毫无压力，只要思路清晰，分分钟搞定。
+
+方案一：调用QLineEdit现有接口
+
+void addAction(QAction * action, ActionPosition position)
+在QLineEdit的前/后添加部件，ActionPosition表示部件所在方位。
+
+QAction * addAction(const QIcon & icon, ActionPosition position)
+重载函数。
+
+枚举：QLineEdit::ActionPosition
+
+常量	值	描述
+QLineEdit::LeadingPosition	0	当使用布局方向Qt::LeftToRight时，部件显示在文本左侧，使用Qt::RightToLeft则显示在右侧。
+QLineEdit::TrailingPosition	1	当使用布局方向Qt::LeftToRight时，部件显示在文本右侧，使用Qt::RightToLeft则显示在左侧。
+方案二：自定义（可以实现任何组合）
+下面，我们来针对自定义进行讲解。
+
+| 版权声明：一去、二三里，未经博主允许不得转载。
+
+效果
+
+
+细节分析
+实现细节需要如下步骤：
+
+组合实现，输入框+按钮
+事件关联
+获取输入文本，进行文本搜索
+为了更人性、易用，这里有一些细节需要注意：
+
+输入框的文本不能处于按钮之下
+输入框无文本时必须给与友好性提示
+按钮无文本描述，一般需要给予ToolTip提示
+按钮样式-正常、滑过、按下，以及鼠标滑过鼠标样式手型，
+这些都想清楚了，我们就能快速实现一个搜索框了。
+
+Coding
+搜索框实现
+
+m_pSearchLineEdit = new QLineEdit();
+QPushButton *pSearchButton = new QPushButton(this);
+
+pSearchButton->setCursor(Qt::PointingHandCursor);
+pSearchButton->setFixedSize(22, 22);
+pSearchButton->setToolTip(QStringLiteral("搜索"));
+pSearchButton->setStyleSheet("QPushButton{border-image:url(:/images/icon_search_normal); background:transparent;} \
+                                     QPushButton:hover{border-image:url(:/images/icon_search_hover)} \
+                                     QPushButton:pressed{border-image:url(:/images/icon_search_press)}");
+
+//防止文本框输入内容位于按钮之下
+QMargins margins = m_pSearchLineEdit->textMargins();
+m_pSearchLineEdit->setTextMargins(margins.left(), margins.top(), pSearchButton->width(), margins.bottom());
+m_pSearchLineEdit->setPlaceholderText(QStringLiteral("请输入搜索内容"));
+
+QHBoxLayout *pSearchLayout = new QHBoxLayout();
+pSearchLayout->addStretch();
+pSearchLayout->addWidget(pSearchButton);
+pSearchLayout->setSpacing(0);
+pSearchLayout->setContentsMargins(0, 0, 0, 0);
+m_pSearchLineEdit->setLayout(pSearchLayout);
+
+connect(pSearchButton, SIGNAL(clicked(bool)), this, SLOT(search()));
+
+
+槽函数实现
+
+void Widget::search()
+{
+    QString strText = m_pSearchLineEdit->text();
+    if (!strText.isEmpty())
+    {
+        QMessageBox::information(this, QStringLiteral("搜索"), QStringLiteral("搜索内容为%1").arg(strText));
+    }
+}
+
+
+源码下载
+Qt之自定义搜索框
+Qt之QLineEdit
