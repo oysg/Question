@@ -1,0 +1,77 @@
+#ifndef __COMPONENT__
+#define __COMPONENT__
+
+#include <map>
+#include <iostream>
+#include <string>
+#include <vector>
+
+using namespace std;
+
+struct TypeValue
+{
+    string strType;
+    void *nValue;
+    int nIndex;
+};
+
+struct NotifyMsg
+{
+public:
+    NotifyMsg() :m_nIndex(0) {}
+    int nMsg;
+    string strClassName;
+    vector<TypeValue> &GetMsgParam();
+    int GetIndex();
+private:
+    vector<TypeValue> m_strMapVoid;
+    int m_nIndex;
+};
+
+
+
+vector<TypeValue> &NotifyMsg::GetMsgParam()
+{
+    return m_strMapVoid;
+}
+
+int NotifyMsg::GetIndex()
+{
+    return m_nIndex++;
+}
+
+#define PACKAGEPARAMETER(ClassName)\
+void PackageParam##ClassName(NotifyMsg &notify) \
+{ \
+} \
+ \
+template <class T, class ...Args> \
+void PackageParam##ClassName(NotifyMsg &notify, T head, Args... rest) \
+{ \
+    T *value = new T; \
+    *value = head; \
+    TypeValue typevalue; \
+    typevalue.strType = typeid(T).name(); \
+    typevalue.nValue = (void*)value; \
+    notify.GetMsgParam().push_back(typevalue); \
+    PackageParam##ClassName(notify, rest...); \
+} \
+
+#define PARSEPARAMETER(ClassName)\
+void ParseParam##ClassName(NotifyMsg &notify) \
+{ \
+    notify.GetMsgParam().clear(); \
+} \
+ \
+template <class T, class ...Args> \
+void ParseParam##ClassName(NotifyMsg &notify, T &head, Args&... rest) \
+{ \
+    int nIndex = notify.GetIndex(); \
+    head = *((T*)notify.GetMsgParam()[nIndex].nValue); \
+    T *value = (T*)notify.GetMsgParam()[nIndex].nValue; \
+    delete value; \
+ \
+    ParseParam##ClassName(notify, rest...); \
+}
+
+#endif
