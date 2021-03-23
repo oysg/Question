@@ -1,0 +1,40 @@
+ QMainWindow(parent),
+    ui(new Ui::MainWindow)
+{
+    ui->setupUi(this);
+   // setWindowFlags(Qt::FramelessWindowHint);
+    //color 设定前景色，就是字体的颜色
+    //background 设定后景色，就是按钮的背景的颜色
+    ui->pushButton->setStyleSheet("QPushButton{color:red;background:yellow}");
+    //background跟background-color:rgb(r,g,b)效果一样，只不过是使用rgb来设定背景颜色
+    ui->pushButton_2->setStyleSheet("QPushButton{color:blue;"
+                                    "background-color:rgb(255,0,0)}");
+    ui->pushButton_3->resize(100,100);
+    ui->pushButton_3->setStyleSheet("QPushButton{"
+                                    "background-image:url(:image/07_u.png);"//设置按钮背景图片
+                                    "background-repeat:repeat-xy;" //设置按钮的背景图片的重复规则，x方向y方向，xy方向
+                                    "background-position:Center;" //设定背景图片在按钮中的位置,按左对齐Left，右Right，中间Center，上Top，底部Bottom
+                                    "background-attachment:fixed;"
+                                    "background-clip:padding}");
+    //可以使用border-top,border-right,border-bottom,border-left分别设定按钮上下左右边框
+    //border-image设定边框的背景图片
+    //border-radius设定边框的弧度
+    ui->pushButton_4->setStyleSheet("QPushButton{"
+                                    "border:3px solid white;"  //宽度为3px的红色边框
+                                    "border-radius:5px}"); //边框角的弧度为8px
+    ui->pushButton_5->resize(70,70);
+    ui->pushButton_5->setStyleSheet("QPushButton{"
+                                    "min-height:20;"
+                                    "border-style:solid;"
+                                    "border-top-left-radius:2px;"
+                                    "border-top-right-radius:2px;"
+                                    "background: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop:0 rgb(226,236,241), "
+                                    "stop: 0.2 rgb(233,242,247),"
+                                    "stop: 0.7 rgb(176,208,225),"
+                                    "stop: 0.8 rgb(176,208,225),"
+                                    "stop: 1 rgb(192,216,232));"
+                                    "}");
+        //border:3px solid red;
+    setStyleSheet("QWidget{background-color:rgb(255,255,255);"
+                  "}");
+}
