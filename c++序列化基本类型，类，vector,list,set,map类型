@@ -1,3 +1,5 @@
+原链接:https://github.com/ouyangshaogong/serialize
+
 #ifndef _SERIALIZE_HEADER_H_
 #define _SERIALIZE_HEADER_H_
 #include <sstream>   //std::stringstream
