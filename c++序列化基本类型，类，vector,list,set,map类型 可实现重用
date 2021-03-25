@@ -13,47 +13,12 @@
 #include <string.h>  //memcpy
 
 using namespace std;
-////////////////////////////////////////////////////
-// define normal template function
-////////////////////////////////////////////////////
-
-template<typename SerializableType>
-std::string serialize(SerializableType& a)
-{
-    return a.serialize();
-}
-
-template<typename SerializableType>
-int deserialize(std::string &str, SerializableType& a)
-{
-    return a.deserialize(str);
-}
 
 /////////////////////////////////////////////////
 //define special template function
 //Serialize for C/C++ basic type
 //examples: short,int,float,long long,double
 /////////////////////////////////////////////////
-#define DEF_BASIC_TYPE_SERIALIZE(Type) \
-std::string serialize(Type& b) \
-{ \
-        std::string ret; \
-        ret.append((const char*)&b,sizeof(Type)); \
-        return ret; \
-}
-
-#define DEF_BASIC_TYPE_DESERIALIZE(Type)  \
-int deserialize(std::string& str,Type& b)\
-{ \
-        memcpy(&b,str.data(),sizeof(Type)); \
-        return sizeof(Type); \
-}
-
-#define DEF_BASIC_TYPE_SERIALIZE_AND_DESERIALIZE(Type) \
-        DEF_BASIC_TYPE_SERIALIZE(Type) \
-        DEF_BASIC_TYPE_DESERIALIZE(Type)
-
-
 #define EXTERN_DEF_BASIC_TYPE_SERIALIZE(Type) \
 extern std::string serialize(Type& b); \
 
@@ -77,15 +42,15 @@ EXTERN_DEF_BASIC_TYPE_SERIALIZE_AND_DESERIALIZE(long long int)
 EXTERN_DEF_BASIC_TYPE_SERIALIZE_AND_DESERIALIZE(unsigned long long int)
 EXTERN_DEF_BASIC_TYPE_SERIALIZE_AND_DESERIALIZE(double)
 
-
 //////////////////////////////////////
 //Serialize for type string
 /////////////////////////////////////
-#define EXTERN_STRING_TYPE_SERIALIZE extern std::string serialize(std::string& s);
-#define EXTERN_STRING_TYPE_DESERIALIZE extern int deserialize(std::string &str, std::string& s);
+#define EXTERN_STRING_TYPE_SERIALIZE(Type) \
+extern std::string serialize(std::string& s);
 
-EXTERN_STRING_TYPE_SERIALIZE
-EXTERN_STRING_TYPE_DESERIALIZE
+#define EXTERN_STRING_TYPE_DESERIALIZE(Type)\
+extern int deserialize(std::string &str, std::string& s);
+
 
 
 ////////////////////////////////////////////
@@ -260,6 +225,7 @@ protected:
     int total;
 };
 
+
 ////////////////////////////////////////////
 //Serialize for custom class object
 //If your class object want to be serialized,
@@ -289,6 +255,40 @@ public:
 cpp文件:serialize.cpp
 
 #include "serialize.h"
+
+////////////////////////////////////////////////////
+// define normal template function
+////////////////////////////////////////////////////
+template<typename SerializableType>
+std::string serialize(SerializableType& a)
+{
+    return a.serialize();
+}
+
+template<typename SerializableType>
+int deserialize(std::string &str, SerializableType& a)
+{
+    return a.deserialize(str);
+}
+
+#define DEF_BASIC_TYPE_SERIALIZE(Type) \
+std::string serialize(Type& b) \
+{ \
+        std::string ret; \
+        ret.append((const char*)&b,sizeof(Type)); \
+        return ret; \
+}
+
+#define DEF_BASIC_TYPE_DESERIALIZE(Type)  \
+int deserialize(std::string& str,Type& b)\
+{ \
+        memcpy(&b,str.data(),sizeof(Type)); \
+        return sizeof(Type); \
+}
+
+#define DEF_BASIC_TYPE_SERIALIZE_AND_DESERIALIZE(Type) \
+        DEF_BASIC_TYPE_SERIALIZE(Type) \
+        DEF_BASIC_TYPE_DESERIALIZE(Type)
 
 DEF_BASIC_TYPE_SERIALIZE_AND_DESERIALIZE(char)
 DEF_BASIC_TYPE_SERIALIZE_AND_DESERIALIZE(unsigned char)
