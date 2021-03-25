@@ -1,0 +1,91 @@
+// lesson_queue.cpp : Defines the entry point for the console application.
+ 
+ 
+#include "ace/Message_Queue.h"
+#include "ace/Synch.h"
+#include "string"
+#include "iostream"
+ 
+using namespace std;
+ 
+class student
+{
+public:
+	student(){}
+	~student(){}
+	int    number;
+	char   name[10];
+	int    english;
+	void output(int i)
+	{
+		if (i == 1)
+		{
+			cout<<"insert " << "number=" << number << " name=" << name << " english=" << english <<endl; 
+		}
+		else
+		{
+			cout<<"delete " << "number=" << number << " name=" << name << " english=" << english <<endl; 
+		}
+	}
+};
+ 
+ 
+int main(int argc, char* argv[])
+{
+	ACE_Message_Queue<ACE_MT_SYNCH> mq;
+ 
+	//进入队列
+	for(int i = 0; i < 10; i++)
+	{
+		student stu;
+		strcpy_s((char*)stu.name, 10, "wangxu");
+		stu.number = i;
+		stu.english = i * 10;
+ 
+		int length1 = sizeof(student);
+		ACE_Message_Block*  mb1 = new ACE_Message_Block(length1, ACE_Message_Block::MB_DATA);	
+ 
+		//以下两句话功能一样
+		//这句简单，一句话完成
+		mb1->copy((char*)&stu, sizeof(student));
+ 
+		//这种方式需要两句话
+		//memcpy(mb1->wr_ptr(), (char*)&stu, legnth1);
+		//mb1->wr_ptr(length1);
+ 
+		int result1 = mq.enqueue(mb1);
+		stu.output(1);
+	}
+ 
+ 
+	//出队列，用新的容器存储内容
+	for(int i = 0; i < 10; i++)
+	{
+		student stu2;
+		ACE_Message_Block *mb2;
+		int result2 = mq.dequeue(mb2);
+		memcpy((char*)&stu2, mb2->rd_ptr(), mb2->length());
+		stu2.output(2);	
+		mb2->release();
+	}
+ 
+ 
+	//出队列，用指针方式，类型适配
+	/*for(int i = 0; i < 10; i++)
+	{
+		student* pstu2;
+		ACE_Message_Block *mb2;
+		int result2 = mq.dequeue(mb2);
+		pstu2 = (student*)mb2->base();
+		pstu2->output(2);
+		mb2->release();
+	}*/
+ 
+	system("pause");
+	return 0;
+}
+ 
+
+————————————————
+版权声明：本文为CSDN博主「u010856711」的原创文章，遵循CC 4.0 BY-SA版权协议，转载请附上原文出处链接及本声明。
+原文链接：https://blog.csdn.net/wayneforever/article/details/9056161
