@@ -1,0 +1,76 @@
+1.问题现象：
+
+ubuntu-live-server:/mnt/hgfs/BOOKDEVELOPMENT/BookManagerSystem/component/msgcomserver$ ./msgcomserver 
+(90884|140063770097472)main>>server is start.....!
+(90884|140063770093312)iMapMsgService::svc>>begin
+(90884|140063770093312|)iMapMsgService::open>>connection success.peer_name:127.0.0.1:57942
+(90884|140063770093312|)iMapMsgService::open>>connection success.peer_name:127.0.0.1:57944
+*** stack smashing detected ***: terminated
+已放弃 (核心已转储)
+
+
+89095|140737345726272)main>>server is start.....!
+[New Thread 0x7ffff77f9700 (LWP 89099)]
+(89095|140737345722112)iMapMsgService::svc>>begin
+(89095|140737345722112|)iMapMsgService::open>>connection success.peer_name:127.0.0.1:57918
+(89095|140737345722112|)iMapMsgService::open>>connection success.peer_name:127.0.0.1:57920
+*** stack smashing detected ***: terminated
+
+Thread 2 "msgcomserver" received signal SIGABRT, Aborted.
+[Switching to Thread 0x7ffff77f9700 (LWP 89099)]
+__GI_raise (sig=sig@entry=6) at ../sysdeps/unix/sysv/linux/raise.c:50
+50	../sysdeps/unix/sysv/linux/raise.c: 没有那个文件或目录.
+
+2.调试发现到200行，*pMsg = m_mCurMsg;这是一个消息复制，消息里面有Json::Value
+Thread 2 "msgcomserver" hit Breakpoint 2, MyMsgQueue::parser (this=0x7ffff00101d8, data=<optimized out>, len=18446744073709551615) at MyMsgQueue.cpp:172
+172	    curData = (uint8_t*)&m_mCurReserved[0];
+(gdb) n
+174	    while (curLen > 0)
+(gdb) 
+176	        bool parserBreak = false;
+(gdb) 
+179	        if (ON_PARSER_INIT == m_mCurParserStatus || ON_PARSER_BODY == m_mCurParserStatus) 
+(gdb) 
+181	            if (!parserHead(&curData, curLen, parserLen, parserBreak))
+(gdb) 
+183	            if (parserBreak)
+(gdb) 
+187	        if (ON_PARSER_HEAD == m_mCurParserStatus)
+(gdb) 
+189	            if (!parserBody(&curData, curLen, parserLen, parserBreak))
+(gdb) 
+191	            if (parserBreak)
+(gdb) 
+196	        if (ON_PARSER_BODY == m_mCurParserStatus)
+(gdb) 
+198	            MyProtoMsg* pMsg = NULL;
+(gdb) 
+199	            pMsg = new MyProtoMsg;
+(gdb) 
+200	            *pMsg = m_mCurMsg;::Value
+(gdb) 
+*** stack smashing detected ***: terminated
+
+Thread 2 "msgcomserver" received signal SIGABRT, Aborted.
+__GI_raise (sig=sig@entry=6) at ../sysdeps/unix/sysv/linux/raise.c:50
+50	../sysdeps/unix/sysv/linux/raise.c: 没有那个文件或目录.
+(gdb) 
+[Thread 0x7ffff77f9700 (LWP 89938) exited]
+
+Program terminated with signal SIGABRT, Aborted.
+The program no longer exists.
+(gdb) b 200
+
+
+3.makefile文件加上jsoncpp静态文件libjsoncpp.a， -L/usr/local/lib /usr/local/lib/libjsoncpp.a，重新编译，程序core
+ubuntu-live-server:/mnt/hgfs/BOOKDEVELOPMENT/BookManagerSystem/component/msgcomserver$ ./msgcomserver 
+(91141|140422661879616)main>>server is start.....!
+(91141|140422661875456)iMapMsgService::svc>>begin
+(91141|140422661875456|)iMapMsgService::open>>connection success.peer_name:127.0.0.1:57946
+(91141|140422661875456|)iMapMsgService::open>>connection success.peer_name:127.0.0.1:57948
+(91141|140422661875456|)MyProtoDecode::parser>>m_mMsgQ.size:1
+parser msg successful!
+(91141|140422661875456)iMapMsgHandle::SendCmdMsgToProc>>send_cnt:37, errno:0
+(91141|140422661875456)iMapMsgService::handle_output>>m_nProcMapSocket.size:1
+
+
